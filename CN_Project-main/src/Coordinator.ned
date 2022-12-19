@@ -13,15 +13,14 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package test_project;
+package termproject;
 
 //
 // TODO auto-generated module
 //
-simple SimpleNode
+simple Coordinator
 {
-    
     gates:
-        input in;
-        output out;
+	    output out_node0; // output to node 1
+    	output out_node1; // output to node 2
 }

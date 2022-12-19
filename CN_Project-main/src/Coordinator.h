@@ -13,15 +13,21 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package test_project;
+#ifndef __TERMPROJECT_COORDINATOR_H_
+#define __TERMPROJECT_COORDINATOR_H_
 
-//
-// TODO auto-generated module
-//
-simple SimpleNode
+#include <omnetpp.h>
+
+using namespace omnetpp;
+
+/**
+ * TODO - Generated class
+ */
+class Coordinator : public cSimpleModule
 {
-    
-    gates:
-        input in;
-        output out;
-}
+  protected:
+    virtual void initialize() override;
+    virtual void handleMessage(cMessage *msg) override;
+};
+
+#endif

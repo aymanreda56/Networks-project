@@ -13,15 +13,12 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package test_project;
-
 //
-// TODO auto-generated module
+// TODO generated message class
 //
-simple SimpleNode
-{
-    
-    gates:
-        input in;
-        output out;
+packet CoordinatorMsg {
+    @customize(true);  // see the generated C++ header for more info
+    string Mtype = "coordinator";
+    int startTime;
+    int startingNode;
 }

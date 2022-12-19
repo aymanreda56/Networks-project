@@ -17,10 +17,16 @@
 
 Define_Module(SimpleNode);
 
+int SimpleNode::timer = 0;
+cMessage* SimpleNode::timeOutGlobal = nullptr;
 void SimpleNode::initialize()
 {
     // TODO - Generated method body
 
+
+
+    timer = 0;
+    //flag = false;
     if(strcmp(getName(), "Sender") == 0)
     {
         cMessage* msg = new cMessage("beign");
@@ -31,12 +37,31 @@ void SimpleNode::initialize()
 void SimpleNode::handleMessage(cMessage *msg)
 {
     // TODO - Generated method body
+    EV <<SimpleNode::timer<<endl;
+
+
+
 
     if(strcmp(msg->getName(), "ack") == 0)
+     {
+           cMessage* fetch = new cMessage("fetch");
+           scheduleAt(simTime()+1, fetch);
+           if(SimpleNode::timeOutGlobal != nullptr and SimpleNode::timeOutGlobal->isScheduled()  )           // or
+           {
+               EV<<"canceled timeout"<<endl;
+               cancelAndDelete(SimpleNode::timeOutGlobal);
+               SimpleNode::timeOutGlobal=nullptr;
+               //cancelAndDelete(timeOutGlobal);
+           }
+
+
+
+           //cancelAndDelete(msg);
+     }
+
+    else if (msg->isSelfMessage() and (strcmp(msg->getName(), "timeOut") == 0))                       //timeout handling
     {
-        cMessage* fetch = new cMessage("fetch");
-        scheduleAt(simTime()+1, fetch);
-        //cancelAndDelete(msg);
+        EV<<"packet lost"<<endl;
     }
 
 
@@ -52,8 +77,13 @@ void SimpleNode::handleMessage(cMessage *msg)
     {
         cMessage* msgtoSend = new cMessage(msg->getName());
         send(msgtoSend, "out");
+        cMessage* timeOutSelf = new cMessage("timeOut");
+        SimpleNode::timeOutGlobal = timeOutSelf;
+        scheduleAt(simTime() + 3, timeOutSelf);
         //cancelAndDelete(msg);
     }
+
+
 
 
 
@@ -66,12 +96,29 @@ void SimpleNode::handleMessage(cMessage *msg)
         //cancelAndDelete(msg);
     }
 
+//
+//
+//
+//    else if(msg->isSelfMessage() and (strcmp(msg->getName(), "ackfetch")== 0) and (strcmp(getName(), "Reciever") == 0) )       //meaning to send the ack
+//        {
+//            EV<<"then I am here"<<endl;
+//            EV<<"Timer now : "<<timer<<endl;
+//            timer = timer +1;
+//            EV<<"will not send ack"<<endl;
+//        }
+
     else if(msg->isSelfMessage() and (strcmp(msg->getName(), "ackfetch")== 0) and (strcmp(getName(), "Reciever") == 0))       //meaning to send the ack
     {
         EV<<"then I am here"<<endl;
+        EV<<"Timer now : "<<SimpleNode::timer<<endl;
+        SimpleNode::timer = SimpleNode::timer +1;
         cMessage* acktoSend = new cMessage("ack");
-        send(acktoSend, "out");                                                         //send the ack
-        //cancelAndDelete(msg);
+        if(SimpleNode::timer != 5)
+        {
+            send(acktoSend, "out");
+        }
+
+       //cancelAndDelete(msg);
     }
 
     //cancelAndDelete(msg);

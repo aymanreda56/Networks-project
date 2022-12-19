@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#ifndef __TEST_PROJECT_SIMPLENODE_H_
-#define __TEST_PROJECT_SIMPLENODE_H_
+#ifndef __TERMPROJECT_NODE_H_
+#define __TERMPROJECT_NODE_H_
 
 #include <omnetpp.h>
 
@@ -23,12 +23,37 @@ using namespace omnetpp;
 /**
  * TODO - Generated class
  */
-class SimpleNode : public cSimpleModule
+class Node : public cSimpleModule
 {
-
-    static cMessage * timeOutGlobal;
-    static int timer;
   protected:
+    bool isSender = false;
+    int nodeNumber = 0;
+    std::vector<std::string> messageErrors;
+    std::vector<std::string> messages;
+    int currentMsgToSend = 0;
+
+    // time of start sending
+    int startingTime = 0;
+
+    // global parameters
+    int WS; // window size
+    int TO; // time out
+    double PT; // processing time
+    double TD; // transmission time
+    double ED; // error delay
+    double DD; // duplication delay
+    double LP; // loss probability
+
+    // window parameters
+    // Sender: window first and last indexes of the vector above
+    int SF = 0;
+    int SL = 0;
+    // Receiver: window index
+    int R = 0;
+
+    // timed out message index
+    int timedoutMsgIndex = -1;
+
     virtual void initialize() override;
     virtual void handleMessage(cMessage *msg) override;
 };

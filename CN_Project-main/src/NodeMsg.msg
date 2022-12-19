@@ -13,15 +13,26 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package test_project;
+//cplusplus {{
+//#include "SomeType.h"
+//}}
+//class noncobject SomeType;
+
+//cplusplus {{
+//#include <map>
+//typedef OtherType std::map<int,int>;
+//}}
+//class noncobject OtherType;
 
 //
-// TODO auto-generated module
+// TODO generated message class
 //
-simple SimpleNode
-{
-    
-    gates:
-        input in;
-        output out;
+packet NodeMsg {
+//    SomeType field1;
+//    OtherType field2;
+	int seq_num;
+	string payload;
+	char parityByte; 
+	int messageType; // data = 0, ack = 1, nack = 2
+	int ack_num;
 }

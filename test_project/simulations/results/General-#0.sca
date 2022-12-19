@@ -1,8 +1,8 @@
 version 3
-run General-0-20221218-14:47:13-19364
+run General-0-20221218-17:17:43-13952
 attr configname General
-attr datetime 20221218-14:47:13
-attr datetimef 20221218-144713
+attr datetime 20221218-17:17:43
+attr datetimef 20221218-171743
 attr experiment General
 attr inifile omnetpp.ini
 attr iterationvars ""
@@ -10,7 +10,7 @@ attr iterationvarsd ""
 attr iterationvarsf ""
 attr measurement ""
 attr network test_project.Net
-attr processid 19364
+attr processid 13952
 attr repetition 0
 attr replication #0
 attr resultdir results
