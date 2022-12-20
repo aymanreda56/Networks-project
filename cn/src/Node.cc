@@ -18,6 +18,7 @@
 #include "NodeMsg_m.h"
 #include <fstream>
 #include <bitset>
+#include<sstream>
 Define_Module(Node);
 
 void Node::initialize()
@@ -31,13 +32,18 @@ void Node::initialize()
     this->ED = getParentModule()->par("ED");//.doubleValue();
     this->DD = getParentModule()->par("DD");//.doubleValue();
     this->LP = getParentModule()->par("LP");//.doubleValue();
-
+    this->logFile.open("D:\\omnetpp-6.0.1\\samples\\cn\\src\\log_"+std::string(getName())+".txt", std::ios_base::app);
 }
 
 void Node::handleMessage(cMessage *msg)
 {
+    std::stringstream ss;
+
     // TODO - Generated method body
-    EV << "handle message from " << getName()<<" SF: "<< this->SF<<" SL: "<<this->SL<<" cur = "<<this->currentMsgToSend<<endl;
+    ss << "handle message from " << getName()<<" SF: "<< this->SF<<" SL: "<<this->SL<<" cur = "<<this->currentMsgToSend<<endl;
+    EV<<ss.str();
+    ss = std::stringstream();
+
     // if the message is from the coordinator
     if(dynamic_cast<CoordinatorMsg_Base*>(msg)!=nullptr){
         CoordinatorMsg_Base* coordinator_msg = check_and_cast<CoordinatorMsg_Base*>(msg);
@@ -83,12 +89,15 @@ void Node::handleMessage(cMessage *msg)
             std::string currentMessage = this->messages[cur];
             std::string errors = this->messageErrors[cur];
 
-            EV << "At time "
+            ss << "At time "
                     <<simTime()// - this->startingTime
                     <<getName()
                     <<" Introduced channel error with code "
                     << errors <<endl;
-
+            EV<<ss.str();
+            this->logFile.open("D:\\omnetpp-6.0.1\\samples\\cn\\src\\log_"+std::string(getName())+".txt", std::ios_base::app);
+            this->logFile<<ss.str();
+            ss = std::stringstream();
             NodeMsg* new_msg = new NodeMsg("send");
             std::string msg_payload = "";
 
@@ -151,7 +160,6 @@ void Node::handleMessage(cMessage *msg)
                     if(errors[0] == '1')
                     {
 //                        EV<<"before mod: "<<msg_payload<<endl;
-                        // CH strpayload -> msg_payload.size()
                         int locationOfError_bits = uniform(0, msg_payload.size()*8);
                         modifiedBitNumber = locationOfError_bits;
 //                        EV<<"i will modify this bit: "<<locationOfError_bits<<endl;
@@ -191,7 +199,7 @@ void Node::handleMessage(cMessage *msg)
                 this->timedoutMsgIndex = -1; // reset
             }
             new_msg->setPayload(msg_payload.c_str());
-            EV <<"At time "
+            ss <<"At time "
                     <<simTime()
                     <<" "<<getName()
                     <<" sent frame with seq_num="
@@ -205,13 +213,18 @@ void Node::handleMessage(cMessage *msg)
                     <<", Duplicate " << (isDuplicated?"1":"0")
                     <<", Delay "<<(isDelayed?this->ED:0)
                     <<endl;
+            EV<<ss.str();
+            this->logFile.open("D:\\omnetpp-6.0.1\\samples\\cn\\src\\log_"+std::string(getName())+".txt", std::ios_base::app);
+            this->logFile<<ss.str();
+            ss = std::stringstream();
+
             if(!isLost){
                 // "send"
 
                 scheduleAt(sendingTime, new_msg);
                 if(isDuplicated){
                     scheduleAt(sendingTime+this->DD, new_msg);
-                    EV <<"At time "
+                    ss <<"At time "
                             // TODO Not good
                             <<simTime()+this->DD
                             <<" "<<getName()
@@ -226,6 +239,10 @@ void Node::handleMessage(cMessage *msg)
                             <<", Duplicate 2 "
                             <<", Delay "<<(isDelayed?this->ED:0)
                             <<endl;
+                    EV<<ss.str();
+                    this->logFile.open("D:\\omnetpp-6.0.1\\samples\\cn\\src\\log_"+std::string(getName())+".txt", std::ios_base::app);
+                    this->logFile<<ss.str();
+                    ss = std::stringstream();
                 }
             }
 
@@ -259,12 +276,22 @@ void Node::handleMessage(cMessage *msg)
             // XXXXX How to send all again except for the corrupted one: send it without error? XXX
             // if it is in window and received timeout: reschedule it
             int badMsgIndex = new_msg->getSeq_num();
+            if(this->timeoutHappened){
+                return;
+            }
             if(badMsgIndex>=this->SF){
-                EV<<"Time out event at time "
+                this->timeoutHappened = true;
+                ss<<"Time out event at time "
                         <<simTime()
                         <<", at "<<getName()
                         <<" for frame with seq_num="
                         <<badMsgIndex<<endl;
+
+                EV<<ss.str();
+                this->logFile.open("D:\\omnetpp-6.0.1\\samples\\cn\\src\\log_"+std::string(getName())+".txt", std::ios_base::app);
+                this->logFile<<ss.str();
+                ss = std::stringstream();
+
                 cMessage*resendMsg = new cMessage("considerNext");
                 this->timedoutMsgIndex = badMsgIndex;
                 this->currentMsgToSend = SF;
@@ -274,7 +301,12 @@ void Node::handleMessage(cMessage *msg)
         // came from receiver should check ack from msg->msgType
         else if(std::string(msg->getName())=="ack"){
             NodeMsg*new_msg = check_and_cast<NodeMsg*>(msg);
-            EV << "Sender received ack with acknum = "<<new_msg->getAck_num() << " and curmsgtosend = "<<this->currentMsgToSend<<endl;
+            ss << "Sender received ack with acknum = "<<new_msg->getAck_num() << " and curmsgtosend = "<<this->currentMsgToSend<<endl;
+            EV<<ss.str();
+            this->logFile.open("D:\\omnetpp-6.0.1\\samples\\cn\\src\\log_"+std::string(getName())+".txt", std::ios_base::app);
+            this->logFile<<ss.str();
+            ss = std::stringstream();
+
 //            if(new_msg->getAck_num()==this->currentMsgToSend+1){
             // XXXXX what if ack not in order?? XXXX
             if(new_msg->getAck_num()==this->SF+1){
@@ -282,6 +314,7 @@ void Node::handleMessage(cMessage *msg)
                 if(SL+1<this->messages.size()){
                     this->SL++;
                 }
+                this->timeoutHappened = false;
 //                this->currentMsgToSend++;
                 scheduleAt(simTime(), new cMessage("considerNext"));
             }
@@ -303,12 +336,16 @@ void Node::handleMessage(cMessage *msg)
             else{
                 sendDelayed(received_msg, this->TD, "out");
             }
-            EV <<"At time "
+            ss <<"At time "
                     <<simTime()<<' '
                     <<getName()<<' '
                     <<"Sending Ack with number "
                     << received_msg->getAck_num()
                     <<", loss = "<<(isLost?"Yes":"No")<<endl;
+            EV<<ss.str();
+            this->logFile.open("D:\\omnetpp-6.0.1\\samples\\cn\\src\\log_"+std::string(getName())+".txt", std::ios_base::app);
+            this->logFile<<ss.str();
+            ss = std::stringstream();
 
             return;
         }
@@ -326,7 +363,7 @@ void Node::handleMessage(cMessage *msg)
 
         if(received_msg->getParityByte() != recParity.to_ulong())             //detected errors
         {
-            EV <<"At time "
+            ss <<"At time "
                            <<simTime()
                            <<" "<<getName()
                            <<" received frame with seq_num="
@@ -341,6 +378,10 @@ void Node::handleMessage(cMessage *msg)
                            <<", lost ? "
                            <<", Duplicate ? "
                            <<", Delay ?"<<endl;
+            EV<<ss.str();
+            this->logFile.open("D:\\omnetpp-6.0.1\\samples\\cn\\src\\log_"+std::string(getName())+".txt", std::ios_base::app);
+            this->logFile<<ss.str();
+            ss = std::stringstream();
 
                        NodeMsg* new_msg = new NodeMsg("nack");
                        new_msg->setAck_num(this->R); // TODO is this true?
@@ -351,7 +392,7 @@ void Node::handleMessage(cMessage *msg)
 
         }
 
-        EV <<"At time "
+        ss <<"At time "
                 <<simTime()
                 <<" "<<getName()
                 <<" received frame with seq_num="
@@ -366,6 +407,10 @@ void Node::handleMessage(cMessage *msg)
                 <<", lost ? "
                 <<", Duplicate ? "
                 <<", Delay ?"<<endl;
+        EV<<ss.str();
+        this->logFile.open("D:\\omnetpp-6.0.1\\samples\\cn\\src\\log_"+std::string(getName())+".txt", std::ios_base::app);
+        this->logFile<<ss.str();
+        ss = std::stringstream();
 
         // send ack
         if(received_msg->getSeq_num()==this->R){

@@ -17,7 +17,7 @@
 #define __TERMPROJECT_NODE_H_
 
 #include <omnetpp.h>
-
+#include<fstream>
 using namespace omnetpp;
 
 /**
@@ -54,6 +54,9 @@ class Node : public cSimpleModule
     // timed out message index
     int timedoutMsgIndex = -1;
 
+    bool timeoutHappened = false;
+
+    std::ofstream logFile;
     virtual void initialize() override;
     virtual void handleMessage(cMessage *msg) override;
 };

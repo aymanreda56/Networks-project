@@ -1,0 +1,23 @@
+At time 0node0 Introduced channel error with code 0000
+At time 0 node0 sent frame with seq_num=0 and payload= $Hi 0$ and trailer = 00110001, Modified -1, lost No, Duplicate 0, Delay 0
+At time 0.5node0 Introduced channel error with code 0100
+At time 0.5 node0 sent frame with seq_num=1 and payload= $Hi 2nd 0$ and trailer = 00101001, Modified -1, lost Yes, Duplicate 0, Delay 0
+Sender received ack with acknum = 1 and curmsgtosend = 2
+At time 3node0 Introduced channel error with code 0000
+At time 3 node0 sent frame with seq_num=2 and payload= $Hi 3rd time 0$ and trailer = 00000001, Modified -1, lost No, Duplicate 0, Delay 0
+Time out event at time 11, at node0 for frame with seq_num=1
+At time 11node0 Introduced channel error with code 0100
+At time 11 node0 sent frame with seq_num=1 and payload= $Hi 2nd 0$ and trailer = 00101001, Modified -1, lost No, Duplicate 0, Delay 0
+At time 11.5node0 Introduced channel error with code 0000
+At time 11.5 node0 sent frame with seq_num=2 and payload= $Hi 3rd time 0$ and trailer = 00000001, Modified -1, lost No, Duplicate 0, Delay 0
+Sender received ack with acknum = 2 and curmsgtosend = 3
+At time 14node0 Introduced channel error with code 0000
+At time 14 node0 sent frame with seq_num=3 and payload= $Hi 4th time 0$ and trailer = 00001100, Modified -1, lost No, Duplicate 0, Delay 0
+Sender received ack with acknum = 3 and curmsgtosend = 4
+At time 14.5node0 Introduced channel error with code 0000
+At time 14.5 node0 sent frame with seq_num=4 and payload= $Hi 5th time 0$ and trailer = 00001101, Modified -1, lost No, Duplicate 0, Delay 0
+Sender received ack with acknum = 4 and curmsgtosend = 5
+At time 17node0 Introduced channel error with code 0000
+At time 17 node0 sent frame with seq_num=5 and payload= $Hi 6th time 0$ and trailer = 00001110, Modified -1, lost No, Duplicate 0, Delay 0
+Sender received ack with acknum = 5 and curmsgtosend = 6
+Sender received ack with acknum = 6 and curmsgtosend = 6
