@@ -130,16 +130,104 @@ void Node::handleMessage(cMessage *msg)
             sendingTime+=this->TD;
 
             // TODO add error delay, duplicate & duplication delay, etc.
-
+            bool isLost = false;
+            bool isDuplicated = false;
+            bool isDelayed = false;
+            int modifiedBitNumber = -1;
             if(this->currentMsgToSend!=this->timedoutMsgIndex){
                 // errors+delays: update sendingTime, msg_payload
                 // seems like loss should be in =="send"
+                // if message is lost:
+                if(errors[1] == '1'){
+                    isLost = true;
+                }
+                else{
+                    // delay error
+                    if(errors[3] == '1'){
+                        sendingTime+=this->ED;
+                        isDelayed = true;
+                    }
+                    // modification
+                    if(errors[0] == '1')
+                    {
+//                        EV<<"before mod: "<<msg_payload<<endl;
+                        // CH strpayload -> msg_payload.size()
+                        int locationOfError_bits = uniform(0, msg_payload.size()*8);
+                        modifiedBitNumber = locationOfError_bits;
+//                        EV<<"i will modify this bit: "<<locationOfError_bits<<endl;
+                        int locationOfError_char = int(locationOfError_bits/8);
+//                        EV<<"i will modify this index: "<<locationOfError_char<<endl;
+                        char errchar = msg_payload[locationOfError_char];
+//                        EV<<"i will modify this char: "<<errchar<<endl;
+                        std::bitset <8> charinBits (errchar);
+                        std::string charincharbits = charinBits.to_string();
+                        int locationOfError = (locationOfError_bits%8);
+//                        EV<<charinBits.to_string()[locationOfError]<<endl;
+                        if(charinBits.to_string()[locationOfError] == '1')
+                        {
+                            charincharbits[locationOfError] = '0';
+                        }
+                        else
+                        {
+//                            EV<<"hello lol ol o"<<endl;
+                            charincharbits[locationOfError] = '1';
+                        }
+//                        EV<<charincharbits[locationOfError]<<endl;
+                        std::bitset<8> charinbitsafter (charincharbits);
+
+                        msg_payload[locationOfError_char] = (char)charinbitsafter.to_ulong();
+//                        EV<<"after mod: "<<msg_payload<<endl;
+//                        cMessage* payloadmsg = new cMessage(payload.c_str());
+//                        scheduleAt(simTime()+par("tt").intValue(), payloadmsg);
+
+                    }
+                    if(errors[2] == '1'){
+                        isDuplicated = true;
+                    }
+
+                }
             }
             else{
                 this->timedoutMsgIndex = -1; // reset
             }
             new_msg->setPayload(msg_payload.c_str());
-            scheduleAt(sendingTime, new_msg);
+            EV <<"At time "
+                    <<simTime()
+                    <<" "<<getName()
+                    <<" sent frame with seq_num="
+                    <<new_msg->getSeq_num()
+                    <<" and payload= "
+                    <<new_msg->getPayload()
+                    <<" and trailer = "
+                    <<std::bitset<8>(new_msg->getParityByte())
+                    <<", Modified " << modifiedBitNumber
+                    <<", lost " << (isLost?"Yes":"No")
+                    <<", Duplicate " << (isDuplicated?"1":"0")
+                    <<", Delay "<<(isDelayed?this->ED:0)
+                    <<endl;
+            if(!isLost){
+                // "send"
+
+                scheduleAt(sendingTime, new_msg);
+                if(isDuplicated){
+                    scheduleAt(sendingTime+this->DD, new_msg);
+                    EV <<"At time "
+                            // TODO Not good
+                            <<simTime()+this->DD
+                            <<" "<<getName()
+                            <<" sent frame with seq_num="
+                            <<new_msg->getSeq_num()
+                            <<" and payload= "
+                            <<new_msg->getPayload()
+                            <<" and trailer = "
+                            <<std::bitset<8>(new_msg->getParityByte())
+                            <<", Modified " << modifiedBitNumber
+                            <<", lost " << (isLost?"Yes":"No")
+                            <<", Duplicate 2 "
+                            <<", Delay "<<(isDelayed?this->ED:0)
+                            <<endl;
+                }
+            }
 
             // start timer for timeout
             NodeMsg* new_msg_for_timeout = new_msg->dup();
@@ -155,27 +243,13 @@ void Node::handleMessage(cMessage *msg)
 
                 scheduleAt(simTime()+this->PT, new_msg_2);
             }
+
+
         }
         // after the delay
         else if(std::string(msg->getName())=="send"){
 
             NodeMsg*new_msg = check_and_cast<NodeMsg*>(msg);
-            EV <<"At time "
-                    <<simTime()
-                    <<" "<<getName()
-                    <<" sent frame with seq_num="
-                    <<new_msg->getSeq_num()
-                    <<" and payload= "
-                    <<new_msg->getPayload()
-                    <<" and trailer = "
-                    <<std::bitset<8>(new_msg->getParityByte())
-                    // TODO : how to do the following???
-                    // maybe will need to make error delay and loss and TD here and use sendDelayed?
-                    <<", Modified -1 "
-                    <<", lost No "
-                    <<", Duplicate 0 "
-                    <<", Delay 0"<<endl;
-
             send(new_msg, "out");
 
         }
@@ -219,33 +293,29 @@ void Node::handleMessage(cMessage *msg)
         NodeMsg* received_msg = check_and_cast<NodeMsg*>(msg);
         // after PT: start sending
         if(std::string(received_msg->getName())=="ack"){
-
-            EV << "time: "<<simTime()<<"rec should send ack"<<endl;
-            // TODO should we calculate loss error here?
-            // and decide not to send it?
-// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> uncomment this <<<<<<<<<<<<<<<<<<<<<<<
-            //TODO Probability of ack LOSS
+            // Probability of ack LOSS
             double prob = uniform(0, 1);
+            bool isLost = false;
             if(prob <= this->LP)
             {
-                EV<<"ACK is lost"<<endl;
-                return;
+                isLost = true;
             }
-            sendDelayed(received_msg, this->TD, "out");
+            else{
+                sendDelayed(received_msg, this->TD, "out");
+            }
             EV <<"At time "
                     <<simTime()<<' '
                     <<getName()<<' '
                     <<"Sending Ack with number "
                     << received_msg->getAck_num()
-                    // How to handle this??
-                    <<", loss = No"<<endl;
+                    <<", loss = "<<(isLost?"Yes":"No")<<endl;
 
             return;
         }
 
 
        // bool errorExists = false;
-        // TODO check for error and send nack and return
+        // check for error and send nack and return
 
         std::string checkrecMes = std::string(received_msg->getPayload());
         std::bitset<8> recParity(0);

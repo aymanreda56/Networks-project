@@ -1,8 +1,8 @@
 version 3
-run General-0-20221219-22:15:19-17036
+run General-0-20221220-11:18:39-2064
 attr configname General
-attr datetime 20221219-22:15:19
-attr datetimef 20221219-221519
+attr datetime 20221220-11:18:39
+attr datetimef 20221220-111839
 attr experiment General
 attr inifile omnetpp.ini
 attr iterationvars ""
@@ -10,12 +10,13 @@ attr iterationvarsd ""
 attr iterationvarsf ""
 attr measurement ""
 attr network termproject.Network
-attr processid 17036
+attr processid 2064
 attr repetition 0
 attr replication #0
 attr resultdir results
 attr runnumber 0
 attr seedset 0
+config debug-on-errors true
 config network termproject.Network
 config Network.WS 2
 config Network.TO 10
@@ -23,7 +24,7 @@ config Network.PT 0.5
 config Network.TD 1.0
 config Network.ED 4.0
 config Network.DD 0.1
-config Network.LP 0.9
+config Network.LP 0.1
 
 par Network.coordinator typename "\"termproject.Coordinator\""
 par Network.node0 typename "\"termproject.Node\""
@@ -35,5 +36,5 @@ par Network PT 0.5
 par Network TD 1
 par Network ED 4
 par Network DD 0.1
-par Network LP 0.9
+par Network LP 0.1
 
