@@ -33,6 +33,13 @@ void Node::initialize()
     this->DD = getParentModule()->par("DD");//.doubleValue();
     this->LP = getParentModule()->par("LP");//.doubleValue();
     this->logFile.open("D:\\omnetpp-6.0.1\\samples\\cn\\src\\log_"+std::string(getName())+".txt", std::ios_base::app);
+
+
+//    std::stringstream ss;
+//    ss<<"hello i am testing the log file"<<endl;
+//
+//    EV<<ss.str();
+//    this->logFile<<ss.str();
 }
 
 void Node::handleMessage(cMessage *msg)
@@ -95,7 +102,7 @@ void Node::handleMessage(cMessage *msg)
                     <<" Introduced channel error with code "
                     << errors <<endl;
             EV<<ss.str();
-            this->logFile.open("D:\\omnetpp-6.0.1\\samples\\cn\\src\\log_"+std::string(getName())+".txt", std::ios_base::app);
+//            this->logFile.open("D:\\omnetpp-6.0.1\\samples\\cn\\src\\log_"+std::string(getName())+".txt", std::ios_base::app);
             this->logFile<<ss.str();
             ss = std::stringstream();
             NodeMsg* new_msg = new NodeMsg("send");
@@ -150,7 +157,7 @@ void Node::handleMessage(cMessage *msg)
                 if(errors[1] == '1'){
                     isLost = true;
                 }
-                else{
+ //               else{
                     // delay error
                     if(errors[3] == '1'){
                         sendingTime+=this->ED;
@@ -193,17 +200,17 @@ void Node::handleMessage(cMessage *msg)
                         isDuplicated = true;
                     }
 
-                }
+ //               }
             }
             else{
                 this->timedoutMsgIndex = -1; // reset
             }
             new_msg->setPayload(msg_payload.c_str());
             ss <<"At time "
-                    <<simTime()
+                    <<simTime() + this->PT
                     <<" "<<getName()
                     <<" sent frame with seq_num="
-                    <<new_msg->getSeq_num()
+                    <<new_msg->getSeq_num() % this->WS
                     <<" and payload= "
                     <<new_msg->getPayload()
                     <<" and trailer = "
@@ -214,7 +221,7 @@ void Node::handleMessage(cMessage *msg)
                     <<", Delay "<<(isDelayed?this->ED:0)
                     <<endl;
             EV<<ss.str();
-            this->logFile.open("D:\\omnetpp-6.0.1\\samples\\cn\\src\\log_"+std::string(getName())+".txt", std::ios_base::app);
+//            this->logFile.open("D:\\omnetpp-6.0.1\\samples\\cn\\src\\log_"+std::string(getName())+".txt", std::ios_base::app);
             this->logFile<<ss.str();
             ss = std::stringstream();
 
@@ -223,13 +230,13 @@ void Node::handleMessage(cMessage *msg)
 
                 scheduleAt(sendingTime, new_msg);
                 if(isDuplicated){
-                    scheduleAt(sendingTime+this->DD, new_msg);
+                    scheduleAt(sendingTime+this->DD, new_msg->dup());
                     ss <<"At time "
                             // TODO Not good
-                            <<simTime()+this->DD
+                            <<simTime()+this->DD  + this->PT
                             <<" "<<getName()
                             <<" sent frame with seq_num="
-                            <<new_msg->getSeq_num()
+                            <<new_msg->getSeq_num() % this->WS
                             <<" and payload= "
                             <<new_msg->getPayload()
                             <<" and trailer = "
@@ -240,7 +247,7 @@ void Node::handleMessage(cMessage *msg)
                             <<", Delay "<<(isDelayed?this->ED:0)
                             <<endl;
                     EV<<ss.str();
-                    this->logFile.open("D:\\omnetpp-6.0.1\\samples\\cn\\src\\log_"+std::string(getName())+".txt", std::ios_base::app);
+//                    this->logFile.open("D:\\omnetpp-6.0.1\\samples\\cn\\src\\log_"+std::string(getName())+".txt", std::ios_base::app);
                     this->logFile<<ss.str();
                     ss = std::stringstream();
                 }
@@ -285,10 +292,10 @@ void Node::handleMessage(cMessage *msg)
                         <<simTime()
                         <<", at "<<getName()
                         <<" for frame with seq_num="
-                        <<badMsgIndex<<endl;
+                        <<badMsgIndex % this->WS<<endl;
 
                 EV<<ss.str();
-                this->logFile.open("D:\\omnetpp-6.0.1\\samples\\cn\\src\\log_"+std::string(getName())+".txt", std::ios_base::app);
+//                this->logFile.open("D:\\omnetpp-6.0.1\\samples\\cn\\src\\log_"+std::string(getName())+".txt", std::ios_base::app);
                 this->logFile<<ss.str();
                 ss = std::stringstream();
 
@@ -303,7 +310,7 @@ void Node::handleMessage(cMessage *msg)
             NodeMsg*new_msg = check_and_cast<NodeMsg*>(msg);
             ss << "Sender received ack with acknum = "<<new_msg->getAck_num() << " and curmsgtosend = "<<this->currentMsgToSend<<endl;
             EV<<ss.str();
-            this->logFile.open("D:\\omnetpp-6.0.1\\samples\\cn\\src\\log_"+std::string(getName())+".txt", std::ios_base::app);
+//            this->logFile.open("D:\\omnetpp-6.0.1\\samples\\cn\\src\\log_"+std::string(getName())+".txt", std::ios_base::app);
             this->logFile<<ss.str();
             ss = std::stringstream();
 
@@ -325,10 +332,11 @@ void Node::handleMessage(cMessage *msg)
     else{
         NodeMsg* received_msg = check_and_cast<NodeMsg*>(msg);
         // after PT: start sending
+        bool isLost = false;
         if(std::string(received_msg->getName())=="ack"){
             // Probability of ack LOSS
             double prob = uniform(0, 1);
-            bool isLost = false;
+
             if(prob <= this->LP)
             {
                 isLost = true;
@@ -340,10 +348,10 @@ void Node::handleMessage(cMessage *msg)
                     <<simTime()<<' '
                     <<getName()<<' '
                     <<"Sending Ack with number "
-                    << received_msg->getAck_num()
+                    << received_msg->getAck_num() % this->WS
                     <<", loss = "<<(isLost?"Yes":"No")<<endl;
             EV<<ss.str();
-            this->logFile.open("D:\\omnetpp-6.0.1\\samples\\cn\\src\\log_"+std::string(getName())+".txt", std::ios_base::app);
+//            this->logFile.open("D:\\omnetpp-6.0.1\\samples\\cn\\src\\log_"+std::string(getName())+".txt", std::ios_base::app);
             this->logFile<<ss.str();
             ss = std::stringstream();
 
@@ -363,54 +371,78 @@ void Node::handleMessage(cMessage *msg)
 
         if(received_msg->getParityByte() != recParity.to_ulong())             //detected errors
         {
+//            ss <<"At time "
+//                           <<simTime()
+//                           <<" "<<getName()
+//                           <<" received frame with seq_num="
+//                           <<received_msg->getSeq_num() % this->WS
+//                           <<" and payload= "
+//                           <<received_msg->getPayload()
+//                           <<" and trailer = "
+//                           <<std::bitset<8>(received_msg->getParityByte())
+//                           // TODO : how to do the following???
+//                           // maybe will need to make error delay and loss and TD here and use sendDelayed?
+//                           <<", Modified 1 "
+//                           <<", lost ? "
+//                           <<", Duplicate ? "
+//                           <<", Delay ?"<<endl;
+//            EV<<ss.str();
+////            this->logFile.open("D:\\omnetpp-6.0.1\\samples\\cn\\src\\log_"+std::string(getName())+".txt", std::ios_base::app);
+//            this->logFile<<ss.str();
+//            ss = std::stringstream();
+            NodeMsg* new_msg = new NodeMsg("nack");
+            new_msg->setAck_num(this->R); // TODO is this true?
+            new_msg->setMessageType(2); // ack
+
+
+
+            double prob = uniform(0, 1);
+            if(prob <= this->LP)
+            {
+                isLost = true;
+            }
+            else{
+                sendDelayed(new_msg, this->PT+this->TD, "out");
+            }
+
+
+
             ss <<"At time "
-                           <<simTime()
-                           <<" "<<getName()
-                           <<" received frame with seq_num="
-                           <<received_msg->getSeq_num()
-                           <<" and payload= "
-                           <<received_msg->getPayload()
-                           <<" and trailer = "
-                           <<std::bitset<8>(received_msg->getParityByte())
-                           // TODO : how to do the following???
-                           // maybe will need to make error delay and loss and TD here and use sendDelayed?
-                           <<", Modified 1 "
-                           <<", lost ? "
-                           <<", Duplicate ? "
-                           <<", Delay ?"<<endl;
+            <<simTime() + this->PT<<' '
+            <<getName()<<' '
+            <<"Sending Nack with number "
+            << received_msg->getAck_num() % this->WS
+            <<", loss = "<<(isLost?"Yes":"No")<<endl;
             EV<<ss.str();
-            this->logFile.open("D:\\omnetpp-6.0.1\\samples\\cn\\src\\log_"+std::string(getName())+".txt", std::ios_base::app);
+//            this->logFile.open("D:\\omnetpp-6.0.1\\samples\\cn\\src\\log_"+std::string(getName())+".txt", std::ios_base::app);
             this->logFile<<ss.str();
+
             ss = std::stringstream();
 
-                       NodeMsg* new_msg = new NodeMsg("nack");
-                       new_msg->setAck_num(this->R); // TODO is this true?
-                       new_msg->setMessageType(2); // ack
-                       sendDelayed(new_msg, this->PT+this->TD, "out");
-                       return;
+            return;
                        //scheduleAt(simTime()+(this->PT), new_msg);
 
         }
 
-        ss <<"At time "
-                <<simTime()
-                <<" "<<getName()
-                <<" received frame with seq_num="
-                <<received_msg->getSeq_num()
-                <<" and payload= "
-                <<received_msg->getPayload()
-                <<" and trailer = "
-                <<std::bitset<8>(received_msg->getParityByte())
-                // TODO : how to do the following???
-                // maybe will need to make error delay and loss and TD here and use sendDelayed?
-                <<", Modified -1 "
-                <<", lost ? "
-                <<", Duplicate ? "
-                <<", Delay ?"<<endl;
-        EV<<ss.str();
-        this->logFile.open("D:\\omnetpp-6.0.1\\samples\\cn\\src\\log_"+std::string(getName())+".txt", std::ios_base::app);
-        this->logFile<<ss.str();
-        ss = std::stringstream();
+//        ss <<"At time "
+//                <<simTime()
+//                <<" "<<getName()
+//                <<" received frame with seq_num="
+//                <<received_msg->getSeq_num() % this->WS
+//                <<" and payload= "
+//                <<received_msg->getPayload()
+//                <<" and trailer = "
+//                <<std::bitset<8>(received_msg->getParityByte())
+//                // TODO : how to do the following???
+//                // maybe will need to make error delay and loss and TD here and use sendDelayed?
+//                <<", Modified -1 "
+//                <<", lost ? "
+//                <<", Duplicate ? "
+//                <<", Delay ?"<<endl;
+//        EV<<ss.str();
+////        this->logFile.open("D:\\omnetpp-6.0.1\\samples\\cn\\src\\log_"+std::string(getName())+".txt", std::ios_base::app);
+//        this->logFile<<ss.str();
+//        ss = std::stringstream();
 
         // send ack
         if(received_msg->getSeq_num()==this->R){

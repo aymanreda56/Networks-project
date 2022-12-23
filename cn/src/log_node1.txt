@@ -1,26 +1,20 @@
-At time 1.5 node1 received frame with seq_num=0 and payload= $Hi 0$ and trailer = 00110001, Modified -1 , lost ? , Duplicate ? , Delay ?
 At time 2 node1 Sending Ack with number 1, loss = No
-At time 4.5 node1 received frame with seq_num=2 and payload= $Hi 3rd time 0$ and trailer = 00000001, Modified -1 , lost ? , Duplicate ? , Delay ?
-At time 12.5 node1 received frame with seq_num=1 and payload= $Hi 2nd 0$ and trailer = 00101001, Modified -1 , lost ? , Duplicate ? , Delay ?
-At time 13 node1 Sending Ack with number 2, loss = No
-At time 13 node1 received frame with seq_num=2 and payload= $Hi 3rd time 0$ and trailer = 00000001, Modified -1 , lost ? , Duplicate ? , Delay ?
-At time 13.5 node1 Sending Ack with number 3, loss = No
-At time 15.5 node1 received frame with seq_num=3 and payload= $Hi 4th time 0$ and trailer = 00001100, Modified -1 , lost ? , Duplicate ? , Delay ?
-At time 16 node1 Sending Ack with number 4, loss = No
-At time 16 node1 received frame with seq_num=4 and payload= $Hi 5th time 0$ and trailer = 00001101, Modified -1 , lost ? , Duplicate ? , Delay ?
-At time 16.5 node1 Sending Ack with number 5, loss = No
-At time 18.5 node1 received frame with seq_num=5 and payload= $Hi 6th time 0$ and trailer = 00001110, Modified -1 , lost ? , Duplicate ? , Delay ?
-At time 19 node1 Sending Ack with number 6, loss = No
-At time 1.5 node1 received frame with seq_num=0 and payload= $Hi 0$ and trailer = 00110001, Modified -1 , lost ? , Duplicate ? , Delay ?
-At time 2 node1 Sending Ack with number 1, loss = No
-At time 4.5 node1 received frame with seq_num=2 and payload= $Hi 3rd time 0$ and trailer = 00000001, Modified -1 , lost ? , Duplicate ? , Delay ?
-At time 12.5 node1 received frame with seq_num=1 and payload= $Hi 2nd 0$ and trailer = 00101001, Modified -1 , lost ? , Duplicate ? , Delay ?
-At time 13 node1 Sending Ack with number 2, loss = No
-At time 13 node1 received frame with seq_num=2 and payload= $Hi 3rd time 0$ and trailer = 00000001, Modified -1 , lost ? , Duplicate ? , Delay ?
-At time 13.5 node1 Sending Ack with number 3, loss = No
-At time 15.5 node1 received frame with seq_num=3 and payload= $Hi 4th time 0$ and trailer = 00001100, Modified -1 , lost ? , Duplicate ? , Delay ?
-At time 16 node1 Sending Ack with number 4, loss = No
-At time 16 node1 received frame with seq_num=4 and payload= $Hi 5th time 0$ and trailer = 00001101, Modified -1 , lost ? , Duplicate ? , Delay ?
-At time 16.5 node1 Sending Ack with number 5, loss = No
-At time 18.5 node1 received frame with seq_num=5 and payload= $Hi 6th time 0$ and trailer = 00001110, Modified -1 , lost ? , Duplicate ? , Delay ?
-At time 19 node1 Sending Ack with number 6, loss = No
+At time 2.5 node1 Sending Ack with number 2, loss = No
+At time 3 node1 Sending Ack with number 3, loss = No
+At time 3.5 node1 Sending Ack with number 0, loss = No
+At time 5 node1 Sending Ack with number 1, loss = No
+At time 6 node1 Sending Nack with number 0, loss = No
+At time 16 node1 Sending Ack with number 2, loss = No
+At time 16.5 node1 Sending Nack with number 0, loss = No
+At time 27 node1 Sending Ack with number 3, loss = No
+At time 27.5 node1 Sending Ack with number 0, loss = No
+At time 32 node1 Sending Ack with number 1, loss = No
+At time 39 node1 Sending Ack with number 2, loss = No
+At time 39.5 node1 Sending Ack with number 3, loss = No
+At time 40 node1 Sending Ack with number 0, loss = No
+At time 40.5 node1 Sending Ack with number 1, loss = No
+At time 42.5 node1 Sending Nack with number 0, loss = No
+At time 42.6 node1 Sending Nack with number 0, loss = No
+At time 46 node1 Sending Ack with number 2, loss = No
+At time 53 node1 Sending Ack with number 3, loss = No
+At time 64 node1 Sending Ack with number 0, loss = No
